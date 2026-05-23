@@ -1,0 +1,119 @@
+version: '3.8'
+
+networks:
+  sylvie-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+
+services:
+
+  # Base de datos compartida
+  postgres:
+    image: postgres:15
+    container_name: sylvie-postgres
+    environment:
+      POSTGRES_USER: sylvie_user
+      POSTGRES_PASSWORD: sylvie_pass
+      POSTGRES_DB: sylvie_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sylvie-network
+
+  # Microservicio Usuarios
+  ms-usuarios:
+    build: ../ms-usuarios
+    container_name: ms-usuarios
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sylvie_db
+      DB_USER: sylvie_user
+      DB_PASS: sylvie_pass
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    networks:
+      - sylvie-network
+
+  # Microservicio Productos
+  ms-productos:
+    build: ../ms-productos
+    container_name: ms-productos
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sylvie_db
+      DB_USER: sylvie_user
+      DB_PASS: sylvie_pass
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    networks:
+      - sylvie-network
+
+  # Microservicio Análisis
+  ms-analisis:
+    build: ../ms-analisis
+    container_name: ms-analisis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sylvie_db
+      DB_USER: sylvie_user
+      DB_PASS: sylvie_pass
+      MS_PRODUCTOS_URL: http://ms-productos:8081
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - ms-productos
+    networks:
+      - sylvie-network
+
+  # Microservicio Recomendaciones
+  ms-recomendaciones:
+    build: ../ms-recomendaciones
+    container_name: ms-recomendaciones
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sylvie_db
+      DB_USER: sylvie_user
+      DB_PASS: sylvie_pass
+      MS_USUARIOS_URL: http://ms-usuarios:8082
+      MS_ANALISIS_URL: http://ms-analisis:8083
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+      - ms-usuarios
+      - ms-analisis
+    networks:
+      - sylvie-network
+
+  # API Gateway
+  api-gateway:
+    build: ../api-gateway
+    container_name: api-gateway
+    environment:
+      MS_USUARIOS_URL: http://ms-usuarios:8082
+      MS_PRODUCTOS_URL: http://ms-productos:8081
+      MS_ANALISIS_URL: http://ms-analisis:8083
+      MS_RECOMENDACIONES_URL: http://ms-recomendaciones:8084
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ms-usuarios
+      - ms-productos
+      - ms-analisis
+      - ms-recomendaciones
+    networks:
+      - sylvie-network
