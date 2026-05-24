@@ -4,7 +4,6 @@ import com.sylvie.app.data.api.RetrofitInstance
 import com.sylvie.app.data.models.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import java.io.IOException
 
 class SylvieRepository {
@@ -15,56 +14,62 @@ class SylvieRepository {
             try {
                 val request = RegistroRequest(nombre, email, password)
                 val response = RetrofitInstance.api.registrar(request)
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.failure(Exception("Respuesta vacía"))
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
                 } else {
                     Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
                 }
-            } catch (e: IOException) {
-                Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexión: ${e.message}"))
             }
         }
     }
 
-    suspend fun agregarRestriccion(usuarioId: Long, ingrediente: String, tipo: String): Result<RestriccionRequest> {
+    suspend fun loginUsuario(email: String, password: String): Result<LoginResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = LoginRequest(email, password)
+                val response = RetrofitInstance.api.login(request)
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
+                } else {
+                    Result.failure(Exception("Credenciales incorrectas"))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexion: ${e.message}"))
+            }
+        }
+    }
+
+
+
+    suspend fun agregarRestriccion(usuarioId: Long, ingrediente: String, tipo: String): Result<RestriccionResponse> {
         return withContext(Dispatchers.IO) {
             try {
                 val request = RestriccionRequest(ingrediente, tipo)
                 val response = RetrofitInstance.api.agregarRestriccion(usuarioId, request)
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.failure(Exception("Respuesta vacía"))
+                if(response.isSuccessful && response.body() != null){
+                    Result.success(response.body()!!)
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
+                    Result.failure(Exception("Error al agregar la restriccion"))
                 }
-            } catch (e: IOException) {
-                Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
+            } catch (e: Exception){
+                Result.failure(Exception("Error de conexcion: ${e.message}"))
             }
         }
     }
 
-    suspend fun obtenerRestricciones(usuarioId: Long): Result<List<RestriccionRequest>> {
+    suspend fun obtenerRestricciones(usuarioId: Long): Result<List<RestriccionResponse>> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = RetrofitInstance.api.obtenerRestricciones(usuarioId)
                 if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.success(emptyList())
+                    Result.success(response.body() ?: emptyList())
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
+                    Result.failure(Exception("Error al obtener restricciones"))
                 }
             } catch (e: IOException) {
-                Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
+                Result.failure(Exception("Error de conexion: ${e.message}"))
             }
         }
     }
@@ -74,17 +79,13 @@ class SylvieRepository {
         return withContext(Dispatchers.IO) {
             try {
                 val response = RetrofitInstance.api.buscarProducto(codigoBarras)
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.failure(Exception("Producto no encontrado"))
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
+                    Result.failure(Exception("Error: Producto no encontrado"))
                 }
             } catch (e: IOException) {
                 Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
             }
         }
     }
@@ -93,20 +94,15 @@ class SylvieRepository {
     suspend fun analizarProducto(codigoBarras: String): Result<AnalisisResponse> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = RetrofitInstance.api.analizarProducto(
-                    mapOf("codigoBarras" to codigoBarras)
-                )
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.failure(Exception("Análisis fallido"))
+                val request = AnalisisRequest(codigoBarras)
+                val response = RetrofitInstance.api.analizarProducto(request)
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
+                    Result.failure(Exception("Error al analizar producto"))
                 }
-            } catch (e: IOException) {
-                Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexión: ${e.message}"))
             }
         }
     }
@@ -115,20 +111,30 @@ class SylvieRepository {
     suspend fun generarRecomendacion(usuarioId: Long, codigoBarras: String): Result<RecomendacionResponse> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = RetrofitInstance.api.generarRecomendacion(
-                    mapOf("usuarioId" to usuarioId, "codigoBarras" to codigoBarras)
-                )
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        Result.success(it)
-                    } ?: Result.failure(Exception("Recomendación fallida"))
+                val request = RecomendacionRequest(usuarioId, codigoBarras)
+                val response = RetrofitInstance.api.generarRecomendacion(request)
+                if (response.isSuccessful && response.body() != null) {
+                    Result.success(response.body()!!)
                 } else {
-                    Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
+                    Result.failure(Exception("Error al generar recomendación"))
                 }
-            } catch (e: IOException) {
-                Result.failure(Exception("Error de red: ${e.message}"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Error del servidor: ${e.code()}"))
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexión: ${e.message}"))
+            }
+        }
+    }
+
+    suspend fun obtenerHistorial(usuarioId: Long): Result<List<RecomendacionHistorial>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = RetrofitInstance.api.obtenerHistorial(usuarioId)
+                if (response.isSuccessful) {
+                    Result.success(response.body() ?: emptyList())
+                } else {
+                    Result.failure(Exception("Error al obtener historial"))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexión: ${e.message}"))
             }
         }
     }

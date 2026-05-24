@@ -1,36 +1,51 @@
 package com.sylvie.app.data.api
 
 import com.sylvie.app.data.models.*
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
 
-    // usuarios
+    // ========== USUARIOS ==========
     @POST("/api/usuarios/registro")
-    fun registrar(@Body request: RegistroRequest): Call<Usuario>
+    suspend fun registrar(@Body request: RegistroRequest): Response<Usuario>
+
+    @POST("/api/usuarios/login")
+    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
     @GET("/api/usuarios/perfil/{id}")
-    fun obtenerPerfil(@Path("id") id: Long): Call<Usuario>
+    suspend fun obtenerPerfil(@Path("id") id: Long): Response<Usuario>
 
     @GET("/api/usuarios/restricciones/{usuarioId}")
-    fun obtenerRestricciones(@Path("usuarioId") usuarioId: Long): Call<List<RestriccionRequest>>
+    suspend fun obtenerRestricciones(@Path("usuarioId") usuarioId: Long): Response<List<RestriccionResponse>>
 
     @POST("/api/usuarios/restricciones/{usuarioId}")
-    fun agregarRestriccion(
+    suspend fun agregarRestriccion(
         @Path("usuarioId") usuarioId: Long,
         @Body request: RestriccionRequest
-    ): Call<RestriccionRequest>
+    ): Response<RestriccionResponse>
 
-    // productos
+    @DELETE("/api/usuarios/restricciones/{usuarioId}/{ingrediente}")
+    suspend fun eliminarRestriccion(
+        @Path("usuarioId") usuarioId: Long,
+        @Path("ingrediente") ingrediente: String
+    ): Response<Unit>
+
+    // ========== PRODUCTOS ==========
     @GET("/api/productos/barras/{codigo}")
-    fun buscarProducto(@Path("codigo") codigo: String): Call<Producto>
+    suspend fun buscarProducto(@Path("codigo") codigo: String): Response<Producto>
 
-    // analisis
+    @GET("/api/productos")
+    suspend fun listarProductos(): Response<List<Producto>>
+
+    // ========== ANÁLISIS ==========
     @POST("/api/analisis/analizar")
-    fun analizarProducto(@Body request: Map<String, String>): Call<AnalisisResponse>
+    suspend fun analizarProducto(@Body request: AnalisisRequest): Response<AnalisisResponse>
 
-    // recomendaciones
+    // ========== RECOMENDACIONES ==========
     @POST("/api/recomendaciones/generar")
-    fun generarRecomendacion(@Body request: Map<String, Any>): Call<RecomendacionResponse>
+    suspend fun generarRecomendacion(@Body request: RecomendacionRequest): Response<RecomendacionResponse>
+
+    @GET("/api/recomendaciones/historial/{usuarioId}")
+    suspend fun obtenerHistorial(@Path("usuarioId") usuarioId: Long): Response<List<RecomendacionHistorial>>
 }
