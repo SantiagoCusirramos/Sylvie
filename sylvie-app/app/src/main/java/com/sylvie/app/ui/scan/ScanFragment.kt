@@ -19,6 +19,7 @@ import com.sylvie.app.R
 import com.sylvie.app.databinding.FragmentScanBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import com.google.mlkit.vision.barcode.common.Barcode
 
 class ScanFragment : Fragment() {
 
@@ -114,7 +115,7 @@ class ScanFragment : Fragment() {
         _binding = null
     }
 
-    inner class BarcodeAnalyzer(private val onBarcodeDetected: (Barcode ) -> Unit) : ImageAnalysis.Analyzer {
+    inner class BarcodeAnalyzer(private val onBarcodeDetected: (Barcode) -> Unit) : ImageAnalysis.Analyzer {
         override fun analyze(imageProxy: ImageProxy) {
             val mediaImage = imageProxy.image
             if (mediaImage != null) {

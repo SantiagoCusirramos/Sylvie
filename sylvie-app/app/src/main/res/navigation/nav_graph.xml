@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_auth">
+
+    <navigation android:id="@+id/nav_auth"
+        app:startDestination="@id/loginFragment">
+
+        <fragment
+            android:id="@+id/loginFragment"
+            android:name="com.sylvie.app.ui.auth.LoginFragment"
+            android:label="Iniciar Sesión"
+            tools:layout="@layout/fragment_login">
+
+            <action
+                android:id="@+id/action_login_to_registro"
+                app:destination="@id/registroFragment" />
+
+            <action
+                android:id="@+id/action_login_to_main"
+                app:destination="@id/nav_main" />
+
+        </fragment>
+
+        <fragment
+            android:id="@+id/registroFragment"
+            android:name="com.sylvie.app.ui.auth.RegistroFragment"
+            android:label="Registro"
+            tools:layout="@layout/fragment_registro">
+
+            <action
+                android:id="@+id/action_registro_to_login"
+                app:destination="@id/loginFragment" />
+
+        </fragment>
+
+    </navigation>
+
+    <!-- Main Graph (con BottomNav) -->
+    <navigation android:id="@+id/nav_main"
+        app:startDestination="@id/nav_scan">
+
+        <fragment
+            android:id="@+id/nav_scan"
+            android:name="com.sylvie.app.ui.scan.ScanFragment"
+            android:label="Escanear"
+            tools:layout="@layout/fragment_scan">
+
+            <action
+                android:id="@+id/action_scan_to_result"
+                app:destination="@id/nav_result" />
+
+        </fragment>
+
+        <fragment
+            android:id="@+id/nav_result"
+            android:name="com.sylvie.app.ui.result.ResultFragment"
+            android:label="Resultado"
+            tools:layout="@layout/fragment_result" />
+
+        <fragment
+            android:id="@+id/nav_history"
+            android:name="com.sylvie.app.ui.history.HistoryFragment"
+            android:label="Historial"
+            tools:layout="@layout/fragment_history" />
+
+        <fragment
+            android:id="@+id/nav_profile"
+            android:name="com.sylvie.app.ui.profile.ProfileFragment"
+            android:label="Perfil"
+            tools:layout="@layout/fragment_profile" />
+
+    </navigation>
+
+</navigation>
