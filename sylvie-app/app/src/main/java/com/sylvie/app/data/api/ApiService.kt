@@ -41,6 +41,7 @@ interface ApiService {
     // ========== ANÁLISIS ==========
     @POST("/api/analisis/analizar")
     suspend fun analizarProducto(@Body request: AnalisisRequest): Response<AnalisisResponse>
+//    suspend fun analizarProducto(@Body request: Map<String, String>): Response<AnalisisResponse>
 
     // ========== RECOMENDACIONES ==========
     @POST("/api/recomendaciones/generar")

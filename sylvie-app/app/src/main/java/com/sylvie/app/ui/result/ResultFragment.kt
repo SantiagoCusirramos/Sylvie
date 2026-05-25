@@ -13,6 +13,8 @@ import com.sylvie.app.databinding.FragmentResultBinding
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import androidx.core.view.isVisible
+import com.sylvie.app.data.models.AnalisisRequest
 
 class ResultFragment : Fragment() {
 
@@ -41,9 +43,8 @@ class ResultFragment : Fragment() {
         lifecycleScope.launch {
             binding.progressBar.isVisible = true
             try {
-                val response = RetrofitInstance.api.analizarProducto(
-                    mapOf("codigoBarras" to codigoBarras)
-                )
+                val request = AnalisisRequest(codigoBarras)
+                val response = RetrofitInstance.api.analizarProducto(request)
                 if (response.isSuccessful) {
                     response.body()?.let { mostrarResultado(it) }
                 } else {

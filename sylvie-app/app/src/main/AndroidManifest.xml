@@ -2,6 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- PERMISOS NECESARIOS -->
+    <!-- Cámara para escanear códigos de barras -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Internet para comunicarse con el backend -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Acceso a red para depuración (no es obligatorio pero ayuda) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Característica requerida: cámara (para que Google Play no la muestre a dispositivos sin cámara) -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,16 +24,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SylvieApp">
+        android:theme="@style/Theme.SylvieApp"
+        android:usesCleartextTraffic="true">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

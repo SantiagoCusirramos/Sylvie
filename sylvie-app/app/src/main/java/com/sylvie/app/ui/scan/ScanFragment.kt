@@ -116,6 +116,7 @@ class ScanFragment : Fragment() {
     }
 
     inner class BarcodeAnalyzer(private val onBarcodeDetected: (Barcode) -> Unit) : ImageAnalysis.Analyzer {
+        @androidx.annotation.OptIn(ExperimentalGetImage::class)
         override fun analyze(imageProxy: ImageProxy) {
             val mediaImage = imageProxy.image
             if (mediaImage != null) {
@@ -124,12 +125,12 @@ class ScanFragment : Fragment() {
                     .addOnSuccessListener { barcodes ->
                         barcodes.firstOrNull()?.let { barcode ->
                             onBarcodeDetected(barcode)
-                            imageProxy.close()
-                            return@addOnSuccessListener
                         }
-                        imageProxy.close()
                     }
                     .addOnFailureListener {
+                        // Error handling
+                    }
+                    .addOnCompleteListener {
                         imageProxy.close()
                     }
             } else {

@@ -74,6 +74,21 @@ class SylvieRepository {
         }
     }
 
+    suspend fun eliminarRestriccion(usuarioId: Long, ingrediente: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = RetrofitInstance.api.eliminarRestriccion(usuarioId, ingrediente)
+                if (response.isSuccessful) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception("Error al eliminar restricción"))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception("Error de conexión: ${e.message}"))
+            }
+        }
+    }
+
     // ========== PRODUCTOS ==========
     suspend fun buscarProducto(codigoBarras: String): Result<Producto> {
         return withContext(Dispatchers.IO) {
